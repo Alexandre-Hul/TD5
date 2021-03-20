@@ -1,8 +1,10 @@
 class Order:
-    def __init__(self,quantity,price,buy=True):
+    #Constructor
+    def __init__(self,quantity,price,id,buy=True):
         self.quantity=quantity
         self.price=price
         self.buy=buy
+        self.id = id
 
     def __eq__(self, other):
         return other and self.quantity == other.quantity and self.price == other.price
@@ -11,67 +13,99 @@ class Order:
         return other and self.price < other.price
 
     def __str__(self):
-        return "%s  at  %s" % (self.quantity, self.price)
+        return "%s at %s" % (self.quantity, self.price)
     
 class Book:
-    def __init__(self,name,buy_orders,sell_orders):
+    #Constructor
+    def __init__(self,name):
         self.name=name
-        self.buy_orders=buy_orders
-        self.sell_orders=sell_orders 
+        self.buy_orders = []
+        self.sell_orders = []
+        self.compteur = 0
         
-    def __str__():
+    def Book_display(self):
         affichage="Book on %s" %(self.name)
         for i in range(len(self.sell_orders)):
-            affichage+="\n\tSELL %s id=%d" %(Order(quantity,price),i)
+            affichage+="\n\tSELL %s id=%d" %(self.sell_orders[i],self.sell_orders[i].id)
         for j in range (len(self.buy_orders)):
-            affichage+="\n\tBUY %s id=%d" %(Order(quantity,price),j)
+            affichage+="\n\tBUY %s id=%d" %(self.buy_orders[j],self.buy_orders[j].id)
+        return affichage + "\n--------------------------------------"
 
+    #We sort the buy orders list in decreasing order
+    def sortBuyOrders(self): 
+        self.buy_orders.sort(key=lambda x : x.price, reverse= True)
     
+    #We sort the buy orders list in increasing order
+    def sortSellOrders(self):
+        self.sell_orders.sort(key=lambda x : x.price, reverse= False)
+
     def insert_buy(self, quantity, price):
+        self.compteur += 1   #order's id
         insert = True
-        print ("Insert BUY %s id=%d on %s" %(Order(quantity,price),len(self.buy_orders)+1,self.name))
-        for i in range(len(sell_orders)):
-            if(sell_orders[i] < Order(quantity, price) or sell_orders[i].price == price):
-                if(sell_orders[i].quantity > quantity):
-                    sell_orders[i].quantity -= quantity
-                    insert = False
-                    print ("Execute %s on %s" %(Order(quantity,price),self.name))
-                elif(sell_orders[i].quantity == quantity):
-                    del sell_orders[i]
-                    insert = False
-                    print ("Execute %s on %s" %(Order(quantity,price),self.name))
+        Book.sortSellOrders(self)
+        print ("Insert BUY %s id=%d on %s" %(Order(quantity,price,self.compteur),self.compteur,self.name))
+        if(len(self.sell_orders) != 0):
+            while quantity > 0:
+                #We check if there is at least one sell order less than or equal to the buy order 
+                if(self.sell_orders[0] < Order(quantity, price, self.compteur) or self.sell_orders[0].price == price):
+                    #if we have enough sell orders, we just execute the order and reduce the quantity. We don't insert the buy order since the quantity is 0
+                    if(self.sell_orders[0].quantity > quantity):
+                        self.sell_orders[0].quantity -= quantity
+                        insert = False
+                        print ("Execute %s on %s" %(Order(quantity,self.sell_orders[0].price, self.compteur),self.name))
+                        break
+                    #if the quantities of the sell and buy order are equal, we execute the order and delete the sell order (quantity = 0)
+                    elif(self.sell_orders[0].quantity == quantity):
+                        del self.sell_orders[0]
+                        insert = False
+                        print ("Execute %s on %s" %(Order(quantity,self.sell_orders[0].price, self.compteur),self.name))
+                        break
+                    #if the sell order's quantity is not great enough, we delete the sell order and check if there is another one we can execute
+                    else:
+                        quantity -= self.sell_orders[0].quantity
+                        print ("Execute %s on %s" %(Order(self.sell_orders[0].quantity,self.sell_orders[0].price, self.compteur),self.name))
+                        del self.sell_orders[0]
                 else:
-                    executed_quantity=quantity
-                    quantity -= sell_orders[i].quantity
-                    del sell_orders[i]
-                    print ("Execute %s on %s" %(Order(executed_quantity,price),self.name))
+                    break
         if(insert):
-            self.buy_orders.append(Order(quantity, price))
-        print(str(Book(self.name,self.buy_orders,self.sell_orders)))
-
-
+            #We add the buy order if we didn't find any correponding sell order or if there still left quantity
+            self.buy_orders.append(Order(quantity, price, self.compteur))
+        Book.sortBuyOrders(self)
+        print(Book.Book_display(self))
 
     def insert_sell(self, quantity, price):
+        self.compteur += 1    #order's id
         insert = True
-        print ("Insert SELL %s id=%d on %s" %(Order(quantity,price),len(self.sell_orders)+1,self.name))
-        for i in range(len(buy_orders)):
-            if(buy_orders[i] > Order(quantity, price) or buy_orders[i].price == price):
-                if(buy_orders[i].quantity > quantity):
-                    buy_orders[i].quantity -= quantity
-                    insert = False
-                    print ("Execute %s on %s" %(Order(quantity,price),self.name))
-                elif(buy_orders[i].quantity == quantity):
-                    del buy_orders[i]
-                    insert = False
-                    print ("Execute %s on %s" %(Order(quantity,price),self.name))
+        Book.sortBuyOrders(self)
+        print ("Insert SELL %s id=%d on %s" %(Order(quantity,price,self.compteur),self.compteur,self.name))
+        if(len(self.buy_orders) != 0):
+            while quantity > 0:
+                #We check if there is at least one buy order more than or equal to the sell order 
+                if(self.buy_orders[0] > Order(quantity, price, self.compteur) or self.buy_orders[0].price == price):
+                    #if we have enough buy orders, we just execute the order and reduce the quantity. We don't insert the sell order since the quantity is 0
+                    if(self.buy_orders[0].quantity > quantity):
+                        self.buy_orders[0].quantity -= quantity
+                        insert = False
+                        print ("Execute %s on %s" %(Order(quantity,self.buy_orders[0].price, self.compteur),self.name))
+                        break
+                    #if the quantities of the sell and buy order are equal, we execute the order and delete the buy order (quantity = 0)
+                    elif(self.buy_orders[0].quantity == quantity):
+                        del self.buy_orders[0]
+                        insert = False
+                        print ("Execute %s on %s" %(Order(quantity,self.buy_orders[0].price, self.compteur),self.name))
+                        break
+                     #if the buy order's quantity is not great enough, we delete the buy order and check if there is another one we can execute
+                    else:
+                        quantity -= self.buy_orders[0].quantity
+                        print ("Execute %s on %s" %(Order(self.buy_orders[0].quantity,self.buy_orders[0].price, self.compteur),self.name))
+                        del self.buy_orders[0]
                 else:
-                    executed_quantity=quantity
-                    quantity -= buy_orders[i].quantity
-                    del buy_orders[i]
-                    print ("Execute %s on %s" %(Order(executed_quantity,price),self.name))
+                    break
         if(insert):
-            self.sell_orders.append(Order(quantity, price))
-        print(str(Book(self.name,self.buy_orders,self.sell_orders)))
+            #We add the sell order if we didn't find any correponding buy order or if there still left quantity
+            self.sell_orders.append(Order(quantity, price, self.compteur))
+        Book.sortSellOrders(self)
+        print(Book.Book_display(self))
 
 
 
