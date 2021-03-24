@@ -1,7 +1,3 @@
-import numpy as np
-import pandas as pd
-from tabulate import tabulate
-
 class Order:
     #Constructor
     def __init__(self,quantity,price,id,buy=True):
