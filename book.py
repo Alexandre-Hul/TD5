@@ -1,3 +1,5 @@
+import pandas
+
 class Order:
     #Constructor
     def __init__(self,quantity,price,id,buy=True):
