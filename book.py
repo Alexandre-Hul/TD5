@@ -1,3 +1,7 @@
+import numpy as np
+import pandas as pd
+from tabulate import tabulate
+
 class Order:
     #Constructor
     def __init__(self,quantity,price,id,buy=True):
@@ -22,14 +26,23 @@ class Book:
         self.buy_orders = []
         self.sell_orders = []
         self.compteur = 0
-        
+    
+    #basic display
+    '''
     def Book_display(self):
         affichage="Book on %s" %(self.name)
         for i in range(len(self.sell_orders)):
             affichage+="\n\tSELL %s id=%d" %(self.sell_orders[i],self.sell_orders[i].id)
         for j in range (len(self.buy_orders)):
             affichage+="\n\tBUY %s id=%d" %(self.buy_orders[j],self.buy_orders[j].id)
-        return affichage + "\n--------------------------------------"
+        return affichage + "\n--------------------------------------"'''
+
+    #tabular display
+    def Book_display(self):
+        df_buy = pd.DataFrame(self.buy_orders, columns=["BUY"])
+        df_sell = pd.DataFrame(self.sell_orders, columns=["SELL"])
+        final_df = pd.concat([df_buy, df_sell], axis = 1).fillna("           ")
+        return(final_df.to_markdown())
 
     #We sort the buy orders list in decreasing order
     def sortBuyOrders(self): 
@@ -71,7 +84,7 @@ class Book:
             #We add the buy order if we didn't find any correponding sell order or if there still left quantity
             self.buy_orders.append(Order(quantity, price, self.compteur))
         Book.sortBuyOrders(self)
-        print(Book.Book_display(self))
+        print(Book.Book_display(self), "\n\n")
 
     def insert_sell(self, quantity, price):
         self.compteur += 1    #order's id
@@ -105,7 +118,7 @@ class Book:
             #We add the sell order if we didn't find any correponding buy order or if there still left quantity
             self.sell_orders.append(Order(quantity, price, self.compteur))
         Book.sortSellOrders(self)
-        print(Book.Book_display(self))
+        print(Book.Book_display(self), "\n\n")
 
 
 
