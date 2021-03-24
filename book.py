@@ -35,9 +35,9 @@ class Book:
 
     #tabular display
     def Book_display(self):
-        df_buy = pd.DataFrame(self.buy_orders, columns=["BUY"])
-        df_sell = pd.DataFrame(self.sell_orders, columns=["SELL"])
-        final_df = pd.concat([df_buy, df_sell], axis = 1).fillna("           ")
+        df_buy = pandas.DataFrame(self.buy_orders, columns=["BUY"])
+        df_sell = pandas.DataFrame(self.sell_orders, columns=["SELL"])
+        final_df = pandas.concat([df_buy, df_sell], axis = 1).fillna("           ")
         return(final_df.to_markdown())
 
     #We sort the buy orders list in decreasing order
